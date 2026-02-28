@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My DBMS Programs</title>
+    <style>
+        textarea {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="program">
+    <h3>Program 1</h3>
+    <button onclick="copyCode('code1')">Copy Code</button>
+</div>
+
+<div class="program">
+    <h3>Program 2</h3>
+    <button onclick="copyCode('code2')">Copy Code</button>
+</div>
+
+<div class="program">
+    <h3>Program 3</h3>
+    <button onclick="copyCode('code3')">Copy Code</button>
+</div>
+
+<div class="program">
+    <h3>Program 4</h3>
+    <button onclick="copyCode('code4')">Copy Code</button>
+</div>
+
+<div class="program">
+    <h3>Program 5</h3>
+    <button onclick="copyCode('code5')">Copy Code</button>
+</div>
+<div class="program">
+    <h3>Program 6</h3>
+    <button onclick="copyCode('code7')">Copy Code</button>
+</div>
+<div class="program">
+    <h3>Program 7</h3>
+    <button onclick="copyCode('code6')">Copy Code</button>
+</div>
+<div class="program">
+    <h3>Program 8</h3>
+    <button onclick="copyCode('code8')">Copy Code</button>
+</div>
+<!-- Hidden Code Storage -->
+<textarea id="code1">
+create table branch (branchid varchar(20) primary key, bname varchar(20), hod varchar(20) not null, unique (bname));
+insert into branch values ('cse_ug', 'comp_sc', 'h1');
+insert into branch values ('ise_ug', 'info_sc', 'h2');
+insert into branch values ('mca_pg', 'master_mca', 'h3');
+insert into branch values ('cse_pg', 'mtech_cse', 'h4');
+select * from branch;
+
+create table student (usn varchar(25) primary key, name varchar(25) not null, addr varchar(25) not null, branchid varchar(20) references branch(branchid), sem int);
+insert into student values ('usn1', 'name1', 'addr1', 'mca_pg', 2);
+insert into student values ('usn2', 'name2', 'addr2', 'mca_pg', 2);
+insert into student values ('usn3', 'name3', 'addr3', 'cse_ug', 1);
+insert into student values ('usn4', 'name4', 'addr4', 'ise_ug', 3);
+select * from student;
+
+create table book (bookid varchar(30) primary key, bookname varchar(30) not null, publisher varchar(30) not null, branchid varchar(20) references branch(branchid), year int);
+insert into book values ('b1', 'c', 'p1', 'mca_pg', 2010);
+insert into book values ('b2', 'cpp', 'p2', 'cse_ug', 2008);
+insert into book values ('b3', 'os', 'p3', 'ise_ug', 2015);
+insert into book values ('b4', 'python', 'p4', 'cse_pg', 2013);
+insert into book values ('b5', 'ssw', 'p5', 'mca_pg', 2012);
+insert into book values ('b6', 'java', 'p6', 'cse_pg', 2008);
+select * from book;
+
+create table author (authid varchar(30) primary key, authname varchar(30) not null, country varchar(30) not null, age int);
+insert into author values ('auth1', 'a1', 'india', 30);
+insert into author values ('auth2', 'a2', 'india', 32);
+insert into author values ('auth3', 'a3', 'india', 34);
+insert into author values ('auth4', 'a4', 'india', 36);
+select * from author;
+
+create table writes (authid varchar(30) references author(authid), bookid varchar(30) references book(bookid));
+insert into writes values ('auth1', 'b1');
+insert into writes values ('auth2', 'b1');
+insert into writes values ('auth3', 'b1');
+insert into writes values ('auth2', 'b2');
+insert into writes values ('auth3', 'b2');
+insert into writes values ('auth4', 'b2');
+insert into writes values ('auth1', 'b3');
+insert into writes values ('auth3', 'b4');
+insert into writes values ('auth3', 'b5');
+insert into writes values ('auth4', 'b6');
+select * from writes;
+
+create table borrows (bookid varchar(30) references book(bookid), usn varchar(30) references student(usn), borrow_dt varchar(30));
+insert into borrows values ('b1', 'usn1', '20-dec-11');
+insert into borrows values ('b1', 'usn1', '20-dec-12');
+insert into borrows values ('b2', 'usn2', '15-aug-13');
+insert into borrows values ('b3', 'usn3', '22-oct-14');
+insert into borrows values ('b4', 'usn1', '15-sep-12');
+insert into borrows values ('b1', 'usn2', '20-dec-13');
+insert into borrows values ('b2', 'usn1', '15-aug-13');
+insert into borrows values ('b3', 'usn4', '22-dec-14');
+select * from borrows;
+
+select * from student where sem=2 and branchid in (select branchid from branch where bname='master_mca');
+
+
+select * from student where usn in ((select usn from student) minus (select usn from borrows));
+
+select s.usn, s.name, b.bname, b1.bookname, b2.borrow_dt, a.authname
+from student s, branch b, book b1, author a, borrows b2, writes w
+where b2.bookid = b1.bookid
+and s.branchid = b.branchid
+and w.bookid = b1.bookid
+and w.authid = a.authid
+and b2.usn = s.usn
+and s.usn in (
+    select usn from student 
+    where sem = 2 
+    and branchid in (
+        select branchid from branch 
+        where bname = 'master_mca'
+    )
+);
+
+select authid,count(*) from writes group by authid;
+
+select * from student where usn in (select usn from borrows group by usn having count(*)>2);
+
+select * from student where usn in (select usn from borrows where bookid in (select bookid from writes group by bookid having count(*)>2));
+
+select * from book order by bookname desc;
+
+select * from student where usn in (select usn from borrows where bookid in (select bookid from book where publisher='p3'));
+
+
+</textarea>
+
+<textarea id="code2">
+create table student (usn int primary key, name varchar(25), dob date not null, branch varchar(15), mark1 int, mark2 int, mark3 int, total int, gpa float);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (3,'aishu','22-mar-1999','cs',80,90,95);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (5,'ammu','03-jun-1999','is',88,80,91);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (12,'laxmi','24-sep-1999','mca',88,92,95);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (22,'saru','04-jun-1999','mba',80,95,95);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (2,'deepa','22-mar-1999','cs',81,89,95);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (9,'bhimu','08-jan-1999','is',88,70,91);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (16,'pavan','04-apr-1999','mca',89,92,90);
+insert into student (usn,name,dob,branch,mark1,mark2,mark3) values (24,'rohit','21-jan-1999','mba',81,88,95);
+select * from student;
+
+update student set total = mark1 + mark2 + mark3;
+
+update student set gpa = (total*100)/300;
+
+select usn,name,dob,mark1,mark2,mark3,total,gpa from student where dob='24-sep-1999';
+
+select * from student where branch='mba';
+
+select usn,name,branch,total,gpa from student s where gpa in (select max(gpa) from student group by branch);
+
+select * from student order by branch,gpa;
+
+select * from student where name like 's%';
+
+select * from student where name like '%n';
+
+select * from student where usn=5;
+
+create view student_score as select usn,name,dob,branch,mark1,mark2,mark3,(mark1+mark2+mark3) as total,((mark1+mark2+mark3)*100)/300 as gpa from student;
+
+select * from student_score;
+
+</textarea>
+
+<textarea id="code3">
+create table team (teamid varchar(10) primary key, tname varchar(25) not null, city varchar(25) not null, coach_name varchar(25) not null, unique(tname));
+insert into team values ('t1','n1','c1','ch1');
+insert into team values ('t2','n2','c2','ch2');
+insert into team values ('t3','n3','c3','ch3');
+insert into team values ('t4','n4','c4','ch4');
+select * from team;
+
+create table player (pid varchar(10) primary key, name varchar(25) not null, phone_no bigint not null unique, age int not null, rol varchar(20) not null, teamid varchar(10) references team(teamid));
+insert into player values ('p1','pname1',111111111,18,'player','t1');
+insert into player values ('p2','pname2',222222222,22,'player','t2');
+insert into player values ('p3','pname3',333333333,24,'captain','t3');
+insert into player values ('p4','pname4',444444444,17,'player','t4');
+insert into player values ('p5','pname5',555555555,25,'captain','t2');
+insert into player values ('p6','pname6',666666666,21,'player','t1');
+insert into player values ('p7','pname7',777777777,23,'captain','t1');
+insert into player values ('p8','pname8',888888888,24,'captain','t4');
+insert into player values ('p9','pname9',999999999,28,'player','t3');
+select * from player;
+
+create table stadium (sid varchar(10) primary key, sname varchar(25) not null, addr varchar(25) not null);
+insert into stadium values ('s1','sn1','addr1');
+insert into stadium values ('s2','sn2','addr2');
+insert into stadium values ('s3','sn3','addr3');
+insert into stadium values ('s4','sn4','addr4');
+select * from stadium;
+
+create table match (mid varchar(25) primary key, teamid varchar(10) references team(teamid), m_date date not null, time float not null);
+insert into match values ('m1','t1','05-jan-2017',10);
+insert into match values ('m2','t2','06-jan-2017',10);
+insert into match values ('m3','t3','07-jan-2017',2);
+insert into match values ('m4','t4','08-jan-2017',5);
+insert into match values ('m5','t2','09-jan-2017',8);
+insert into match values ('m6','t3','09-jan-2017',2);
+insert into match values ('m7','t1','10-jan-2017',10);
+insert into match values ('m8','t4','11-jan-2017',9);
+select * from match;
+
+create table plays (sid varchar(10) references stadium(sid), mid varchar(25) references match(mid), teamid varchar(10) references team(teamid), pid varchar(10) references player(pid), result varchar(10) not null);
+insert into plays values ('s1','m1','t1','p7','won');
+insert into plays values ('s2','m2','t2','p2','won');
+insert into plays values ('s3','m3','t3','p3','lose');
+insert into plays values ('s4','m4','t4','p4','won');
+insert into plays values ('s3','m5','t2','p5','lose');
+insert into plays values ('s2','m6','t3','p9','won');
+insert into plays values ('s1','m7','t1','p3','won');
+insert into plays values ('s4','m8','t3','p9','won');
+select * from plays;
+
+
+select p.name,t.tname,p.age from player p,team t where p.teamid=t.teamid and p.age=(select min(age) from player);
+
+select * from stadium where sid in (select sid from plays group by sid having count(*)>=(select max(count(*)) from plays group by sid));
+
+select p.pid,p.name,p.rol from player p,plays p1 where p.pid=p1.pid and p.rol!='captain' and p1.result='won' group by p.pid,p.name,p.rol having count(*)>=1;
+
+select * from team where teamid in (select teamid from plays where result='won' group by teamid having count(*)=(select max(count(*)) from plays where result='won' group by teamid));
+
+select tname from team where teamid in (select teamid from plays where result='won' group by teamid having count(distinct sid)=1);
+
+</textarea>
+
+<textarea id="code4">
+create table state_vote (sid varchar(15) primary key, sname varchar(25) not null, unique(sname));
+insert into state_vote values ('s1','sname1');
+insert into state_vote values ('s2','sname2');
+insert into state_vote values ('s3','sname3');
+insert into state_vote values ('s4','sname5');
+select * from state_vote;
+
+create table party (pid varchar(15) primary key, pname varchar(25) not null, symbol varchar(15) not null, unique(symbol));
+insert into party values ('p1','pname1','s1');
+insert into party values ('p2','pname2','s2');
+insert into party values ('p3','pname3','s3');
+insert into party values ('p4','pname4','s4');
+select * from party;
+
+create table cons (cid varchar(15) primary key, cname varchar(15) not null, sid varchar(15) references state_vote(sid), voters int not null);
+insert into cons values ('c1','cn1','s1',10);
+insert into cons values ('c2','cn2','s2',20);
+insert into cons values ('c3','cn3','s3',25);
+insert into cons values ('c4','cn4','s1',15);
+insert into cons values ('c5','cn5','s4',12);
+insert into cons values ('c6','cn6','s4',18);
+select * from cons;
+
+create table voter (vid varchar(15) primary key, vname varchar(25) not null, age int check(age>17), addr varchar(30) not null, cid varchar(15) references cons(cid));
+insert into voter values ('v1','vn1',19,'102,c1,s1,123','c1');
+insert into voter values ('v2','vn2',18,'103,c2,s2,124','c2');
+insert into voter values ('v3','vn3',20,'104,c3,s3,125','c3');
+insert into voter values ('v4','vn4',40,'105,c4,s4,126','c4');
+insert into voter values ('v5','vn5',35,'106,c5,s2,127','c5');
+insert into voter values ('v6','vn6',38,'107,c6,s3,128','c6');
+insert into voter values ('v7','vn7',63,'108,c5,s2,129','c5');
+select * from voter;
+
+create table candidate (cand_id varchar(15) primary key, cname varchar(15) not null, ph_no int unique, age int check(age>21), sid varchar(15) references state_vote(sid));
+insert into candidate values ('cd1','n1',1234,28,'s1');
+insert into candidate values ('cd2','n2',3421,25,'s2');
+insert into candidate values ('cd3','n3',5423,38,'s3');
+insert into candidate values ('cd4','n4',7253,68,'s4');
+insert into candidate values ('cd5','n5',1432,45,'s1');
+select * from candidate;
+
+create table belong_to (cand_id varchar(15) references candidate(cand_id), pid varchar(15) references party(pid));
+insert into belong_to values ('cd1','p1');
+insert into belong_to values ('cd2','p2');
+insert into belong_to values ('cd3','p3');
+insert into belong_to values ('cd4','p4');
+insert into belong_to values ('cd5','p1');
+select * from belong_to;
+
+create table contests (cid varchar(15) references cons(cid), pid varchar(15) references party(pid), cand_id varchar(15) references candidate(cand_id), sid varchar(15) references state_vote(sid));
+insert into contests values ('c1','p1','cd1','s1');
+insert into contests values ('c2','p1','cd1','s1');
+insert into contests values ('c1','p2','cd2','s2');
+insert into contests values ('c2','p3','cd3','s3');
+insert into contests values ('c3','p1','cd1','s4');
+insert into contests values ('c4','p4','cd4','s3');
+select * from contests;
+
+
+select * from candidate where cand_id in (select cand_id from contests group by cand_id having count(*)>1);
+
+select * from state_vote where sid in (select sid from contests group by sid having count(*)=(select max(count(*)) from contests group by sid));
+
+create or replace procedure insert_voter(p_vid varchar,p_vname varchar,p_age int,p_addr varchar,p_cid varchar) is begin if p_age>=18 then insert into voter values (p_vid,p_vname,p_age,p_addr,p_cid); else dbms_output.put_line('not an eligible voter'); end if; end;
+execute insert_voter('v8','vn8',63,'108,c7,s1,129','c6');
+
+create or replace procedure display_voters(p_cname varchar) is v_total number; begin select voters into v_total from cons where cname=p_cname; dbms_output.put_line('total voters: '||v_total); end;
+execute display_voters('cn1');
+
+
+</textarea>
+
+<textarea id="code5">
+create table state (sid varchar(15) primary key, sname varchar(25) not null);
+insert into state values ('s1','sname1');
+insert into state values ('s2','karnataka');
+insert into state values ('s3','sname3');
+insert into state values ('s4','sname4');
+insert into state values ('s5','sname5');
+select * from state;
+
+create table tourist (tid varchar(15) primary key, name varchar(20) not null, age int not null, country varchar(25) not null, email varchar(25) not null);
+insert into tourist values ('t1','tname1',20,'c1','e1@gmail.com');
+insert into tourist values ('t2','tname2',18,'c2','e2@gmail.com');
+insert into tourist values ('t3','tname3',25,'c1','e3@gmail.com');
+insert into tourist values ('t4','tname4',30,'c2','e4@gmail.com');
+insert into tourist values ('t5','tname5',24,'c3','e5@gmail.com');
+insert into tourist values ('t6','tname6',27,'c4','e6@gmail.com');
+insert into tourist values ('t7','tname7',28,'c5','e7@gmail.com');
+select * from tourist;
+
+create table tourist_place (tpid varchar(25) primary key, name varchar(25) not null, sid varchar(15) references state(sid), distance int check(distance between 1 and 100), history varchar(20) not null);
+insert into tourist_place values ('tp1','karnataka','s1',60,'adilsha');
+insert into tourist_place values ('tp2','name1','s2',50,'vijayanagar');
+insert into tourist_place values ('tp3','name3','s3',55,'mysore');
+insert into tourist_place values ('tp4','name4','s4',45,'agra');
+insert into tourist_place values ('tp5','name5','s5',35,'kanyakumari');
+insert into tourist_place values ('tp6','name6','s5',40,'rameshwar');
+insert into tourist_place values ('tp7','name7','s4',56,'ayodhya');
+insert into tourist_place values ('tp8','name8','s2',64,'madurai');
+select * from tourist_place;
+
+create table visits (tpid varchar(25) references tourist_place(tpid), tid varchar(15) references tourist(tid), vdate date not null);
+insert into visits values ('tp2','t2','21-nov-2021');
+insert into visits values ('tp3','t3','22-nov-2021');
+insert into visits values ('tp4','t4','23-nov-2021');
+insert into visits values ('tp5','t5','24-nov-2021');
+insert into visits values ('tp2','t1','25-nov-2021');
+insert into visits values ('tp1','t2','26-nov-2021');
+insert into visits values ('tp1','t3','26-nov-2021');
+select * from visits;
+
+
+select sname from state where sid in (select sid from tourist_place group by sid having count(*)>=(select max(count(*)) from tourist_place group by sid));
+
+select * from tourist_place where tpid in (select tpid from visits group by tpid having count(*)>=(select max(count(*)) from visits group by tpid));
+
+select * from tourist where tid in (select tid from visits where tpid in (select tpid from tourist_place where sid in (select sid from state where sname='karnataka'))) order by tid;
+
+select * from tourist where tid in (select distinct tid from visits);
+
+select * from tourist_place where tpid in (select distinct tpid from visits);
+
+</textarea>
+
+<textarea id="code6">
+   
+    College.html
+<?xml version ="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Home Page</title>
+<Meta name="Author" content=" S S Adhyapak"/>
+</head>
+<body>
+<h1><center><b> BLDEA's DR PG HALAKATTI COLLEGE OF ENGINEERING & TECHNOLOGY,
+VIJAYPUR</b></center></h1>
+<h2><p><center>WELCOME to Post Graduate Section</section></center></h2> <center><img
+src="Blde12.jpg" alt="image not found"></center>
+<a href="mca.html">MCA</a>
+<br/>
+<a href="course.html">Course Details</a>
+<p>
+</body>
+</html>
+
+
+Course.html
+<?xml version ="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Home page</title>
+</head>
+<body>
+<h1><b>Total no. of students in MCA</b></h1>
+<br/>
+<hr/>
+<ol>
+<li><a href="firstyear.html">First year(56)</a></li>
+<li>Second Year(46)</li>
+<li>Second Year(46)</li>
+</ol>
+<br/>
+<hr/>
+<p> PLease contact for MCA department for more details</p> <br/>
+<a href="college.html">Home</a>
+</body>
+</html>
+
+
+Firstyear.html
+<?xml version ="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Home page</title>
+</head>
+<body>
+<h1><b>Total no. of students in MCA First Year</b><hr/> <br/>
+<ul>
+<li>Girls 30</li>
+<li>Boys 26</li>
+</ul>
+<br/>
+<hr/>
+<p> Please contact for MCA department for more details</p> <br/>
+<a href="college.html">Home</a>
+</body>
+</html>
+
+
+Mca.html
+<?xml version ="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Lab program 1</title>
+</head>
+<body>
+<h1><center> Master Of Computer Applications</h1></center> <center><p> Master Of Computer
+Application</center></p>
+<center><table border="5" width="20%"> <!--table with name & email--> <tr>
+<th width="240">Duration</th>
+<th>INTAKE</th>
+</tr>
+<tr>
+<td width="240">2 Years</td>
+<td>12</td>
+</tr>
+<tr>
+<td width="240">3 Years</td>
+<td>60</td>
+</tr>
+</table>
+</center>
+<hr>
+<p>
+<em><b>Please contact MCA department for More details</b></em> </p>
+<a href="college.html">Home</a>
+</body>
+</html>
+
+</textarea>
+<textarea id="code7">
+    Prog7a.html
+<? xml version="1.0" encoding="utf-8"?>
+<! DOCTYPE html PUBLIC "//W3C//DTD XHTML 1.1 //EN""
+http://www.w3.org/TR/Xhtml11/DTD/xhtml1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Fibonacci numbers</title>
+</head>
+<body>
+<script type="text/javascript">
+var fib1=0,fib2=1,fib=0;
+var num=prompt("enter a number:\n","");
+if (num!=null&&num>0)
+{
+document.write("<h1>"+num+"Fibonacci are<br></h1>");
+if(num==1)
+document.write("<h1>"+fib1+"</h1>");
+else
+document.write("<h1>"+fib1+""+fib2+"</h1>");
+for(i=3;i<=num;i++)
+{
+fib=fib1+fib2;
+document.write("<h1>"+fib+"</h1>");
+fib1=fib2;
+fib2=fib;
+}
+}
+else
+alert("No proper input");
+</script>
+</body>
+</html>
+
+<? xml version="1.0" encoding="utf-8"?>
+<! DOCTYPE html PUBLIC "//W3C//DTD XHTML 1.1 //EN""
+http://www.w3.org/TR/Xhtml11/DTD/xhtml1.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+<script type="text/javascript">
+var num=prompt("enter a number:\n","");
+if(num>0&&num!=null){
+msgstr="Number and its squares are\n";
+for(i=1;i<=num;i++)
+{
+msgstr=msgstr+i+"-"+i*i+"\n";
+}
+alert(msgstr)
+}
+else
+alert("no input supplied");
+</script>
+</body>
+</html>
+
+</textarea>
+<textarea id="code8">
+
+    Prog 8a.html
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//w3c//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Paragraph</title>
+<link rel="stylesheet" type="text/css" href="prog10a.css"/>
+<script type="text/javascript">
+var toplayer="layer4";
+function stack(toTop)
+{
+var oldtop=document.getElementById(toplayer).style;
+var newtop=document.getElementById(toTop).style;
+oldtop.zIndex="0";
+newtop.zIndex="10";
+toplayer=toTop;
+}
+</script>
+</head>
+<body>
+<div class="ls1" id="layer1" onmouseover="stack('layer1')">
+<b>Paragraph1</b></div>
+<div class="ls2" id="layer2" onmouseover="stack('layer2')">
+<b>Paragraph2</b></div>
+<div class="ls3" id="layer3" onmouseover="stack('layer3')">
+<b>Paragraph3</b></div>
+<div class="ls4" id="layer4" onmouseover="stack('layer4')">
+<b>Paragraph4</b></div>
+</body>
+</html>
+
+prog10a.css
+.ls1{border:solid thick black; padding:1in;
+width:500px;
+background-color:red; position:absolute;
+top:100px;
+left:200px;
+}
+.ls2{border:solid thick black; padding:1in;
+width:500px;
+background-color:green; position:absolute;
+top:115px;
+left:250px;
+}
+.ls3{border:solid thick black; padding:1in;
+width:500px;
+background-color:white; position:absolute;
+top:120px;
+left:300px;
+}
+.ls4{border:solid thick black; padding:1in;
+width:500px;
+background-color:orange; position:absolute;
+top:125px;
+left:350px;
+}
+
+
+Prog 8b.html
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//w3c//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"> <head>
+<title>Paragraph</title>
+<link rel="stylesheet" type="text/css" href="prog10b.css"/> <script type="text/javascript">
+var toplayer="layer4";
+var origpos;
+function stack(toTop)
+{
+var newtop=document.getElementById(toTop).style; newtop.zIndex="10";
+toplayer=toTop;
+}
+</script>
+</head>
+<body>
+Paragraph to demonstratestack
+<div class="ls1" id="layer1" onmouseover="stack('layer1')"> <b>Paragraph1</b></div>
+<div class="ls2" id="layer2" onmouseover="stack('layer2')"> <b>Paragraph2</b></div>
+<div class="ls3" id="layer3" onmouseover="stack('layer3')"> <b>Paragraph3</b></div>
+<div class="ls4" id="layer4" onmouseover="stack('layer4')"> <b>Paragraph4</b></div>
+</body>
+</html>
+
+Prog10b.css
+.ls1{border:solid thick black; padding:1in;
+width:500px;
+background-color:red; position:absolute;
+top:100px;
+left:200px;
+}
+.ls2{border:solid thick black; padding:1in;
+width:500px;
+background-color:green; position:absolute;
+top:115px;
+left:250px;
+}
+.ls3{border:solid thick black; padding:1in;
+width:500px;
+background-color:white; position:absolute;
+top:120px;
+left:300px;
+}
+.ls4{border:solid thick black; padding:1in;
+width:500px;
+background-color:orange; position:absolute;
+top:125px;
+left:350px;
+}
+
+</textarea>
+<script>
+function copyCode(id) {
+    var copyText = document.getElementById(id);
+    copyText.style.display = "block";
+    copyText.select();
+    document.execCommand("copy");
+    copyText.style.display = "none";
+    alert("Code Copied Successfully!");
+}
+</script>
+
+</body>
+</html>
